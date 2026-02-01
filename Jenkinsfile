@@ -17,6 +17,9 @@ pipeline {
             }
         }
         stage ('test') {
+            when {
+                expression { return params.RUN_TESTS }
+            }
             steps {
                 echo 'Testing...'
             }
