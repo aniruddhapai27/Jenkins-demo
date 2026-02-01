@@ -1,42 +1,59 @@
 def gv
 
 pipeline {
-    agent any 
+    agent any
+
     environment {
         NEW_VERSION = "1.2.3"
     }
+
     parameters {
-        string(name: 'CUSTOM_PARAM', defaultValue: 'default_value', description: 'A custom parameter for the build')
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Select the deployment environment')
-        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Whether to run tests or not')
+        string(
+            name: 'CUSTOM_PARAM',
+            defaultValue: 'default_value',
+            description: 'A custom parameter for the build'
+        )
+        choice(
+            name: 'ENVIRONMENT',
+            choices: ['dev', 'staging', 'production'],
+            description: 'Select the deployment environment'
+        )
+        booleanParam(
+            name: 'RUN_TESTS',
+            defaultValue: true,
+            description: 'Whether to run tests or not'
+        )
     }
 
     stages {
-        stage ('init') {
+        stage('init') {
             steps {
-               script {
-                    gv = load "script.groovy"
-               } 
+                script {
+                    gv = load 'script.groovy'
+                }
             }
         }
-        stage ('build') {
-            script {
-                steps {
+
+        stage('build') {
+            steps {
+                script {
                     gv.buildApp()
                 }
                 echo 'Building...'
-                echo "Version: ${NEW_VERSION}"
+                echo "Version: ${env.NEW_VERSION}"
             }
         }
-        stage ('test') {
+
+        stage('test') {
             when {
-                    expression {  params.RUN_TESTS == true }
+                expression { params.RUN_TESTS }
             }
             steps {
                 echo 'Testing...'
             }
         }
-        stage ('deploy') {
+
+        stage('deploy') {
             steps {
                 echo 'Deploying...'
                 echo "Environment: ${params.ENVIRONMENT}"
