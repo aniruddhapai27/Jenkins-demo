@@ -46,7 +46,7 @@ pipeline {
         stage ('deploy') {
             steps {
                 script {
-                    env.ENV = input message "Select deployment environment", parameters: [choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Select the deployment environment')]
+                    env.ENV = input message: "Select deployment environment", parameters: [choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Select the deployment environment')]
                     echo "Selected environment: ${env.ENV}"
                 }
                 echo 'Deploying...'
