@@ -10,17 +10,25 @@ pipeline {
     }
 
     stages {
+        stage ('init') {
+            steps {
+               script {
+                    gv = load "script.groovy"
+               } 
+            }
+        }
         stage ('build') {
             steps {
+                steps {
+                    gv.buildApp()
+                }
                 echo 'Building...'
                 echo "Version: ${NEW_VERSION}"
             }
         }
         stage ('test') {
             when {
-                    expression {
-                        params.RUN_TESTS == true
-                    }
+                    expression {  params.RUN_TESTS == true }
             }
             steps {
                 echo 'Testing...'
