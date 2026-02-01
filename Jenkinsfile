@@ -1,56 +1,30 @@
-def gv
-
 pipeline {
-    agent any 
-    environment {
-        NEW_VERSION = "1.2.3"
+    agent any
+    tools {
+        nodejs "my-nodejs"
     }
-    parameters {
-        string(name: 'CUSTOM_PARAM', defaultValue: 'default_value', description: 'A custom parameter for the build')
-        choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Select the deployment environment')
-        booleanParam(name: 'RUN_TESTS', defaultValue: true, description: 'Whether to run tests or not')
-    }
-
     stages {
-        stage ('init') {
+        stage('Build Image') {
             steps {
-               script {
-                    gv = load "script.groovy"
-               } 
-            }
-        }
-        stage ('build') {
-            input {
-                message "Select env"
-                ok "Continue"
-                parameters {
-                    choice(name: 'BUILD_ENV', choices: ['development', 'production'])
-                }
-            }
-            steps {
-                script {
-                    gv.buildApp()
-                }
                 echo 'Building...'
-                echo "Version: ${NEW_VERSION}"
+                withCreentials([
+                    usernamePassword(credentialsId: 'docker-hub-repo', usernameVariable: "USERNAME", passwordVariable: "PASSWORD")
+                ]) {
+                    sh 'docker build -t aniruddhapai/demo-app:2.0 .'
+                    sh 'echo $PASSWORD | docker login -u $USERNAME --password-stdin'
+                    sh 'docker push aniruddhapai/demo-app:2.0'
+                }
+
             }
         }
-        stage ('test') {
-            when {
-                    expression {  params.RUN_TESTS == true }
-            }
+        stage('Test') {
             steps {
                 echo 'Testing...'
+                // Add test steps here
             }
         }
-        stage ('deploy') {
-            steps {
-                script {
-                    env.ENV = input message: "Select deployment environment", parameters: [choice(name: 'ENVIRONMENT', choices: ['dev', 'staging', 'production'], description: 'Select the deployment environment')]
-                    echo "Selected environment: ${env.ENV}"
-                }
-                echo 'Deploying...'
-                echo "Environment: ${params.ENVIRONMENT}"
+        stage('Deploy') {
+            steps {     
             }
         }
     }
