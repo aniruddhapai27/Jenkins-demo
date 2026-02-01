@@ -18,7 +18,9 @@ pipeline {
         }
         stage ('test') {
             when {
-                expression { return params.RUN_TESTS }
+                    expression {
+                        params.RUN_TESTS == true
+                    }
             }
             steps {
                 echo 'Testing...'
